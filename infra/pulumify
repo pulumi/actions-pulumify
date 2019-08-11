@@ -58,7 +58,7 @@ cd /infra
 
 # Extract the branch name and clean it to produce a stack name.
 PULUMI_STACK_NAME=$(echo "pulumify-$PR_BRANCH" | sed "s/[^[:alnum:].-]/-/g")
-if [ ! -z "$PULUMIFY_ORGANIZATION" ]; then
+if [ ! -z "${PULUMIFY_ORGANIZATION:-}" ]; then
     # If an organization stack is requested, put the stack under the organization.
     PULUMI_STACK_NAME=$PULUMIFY_ORGANIZATION/$PULUMI_STACK_NAME
 fi
