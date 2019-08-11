@@ -57,12 +57,11 @@ fi
 cd /infra
 
 # Extract the branch name and clean it to produce a stack name.
-#if [ -z "$GITHUB_REF" ]; then
-#    GITHUB_REF="refs/heads/master"
-#fi
-#PR_BRANCH=$(echo $GITHUB_REF | sed "s/refs\/heads\///g")
-#PR_BRANCH=$(echo $GITHUB_REF | sed "s/refs\/heads\///g")
 PULUMI_STACK_NAME=$(echo "pulumify-$PR_BRANCH" | sed "s/[^[:alnum:].-]/-/g")
+if [ ! -z "$PULUMIFY_ORGANIZATION" ]; then
+    # If an organization stack is requested, put the stack under the organization.
+    PULUMI_STACK_NAME=$PULUMIFY_ORGANIZATION/$PULUMI_STACK_NAME
+fi
 echo "# PR stack name: $PULUMI_STACK_NAME"
 
 # Now attempt to change to the desired stack. Ignore errors, we'll check the result later.
