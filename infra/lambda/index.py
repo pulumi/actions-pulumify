@@ -5,6 +5,7 @@ import tarfile
 import tempfile
 import shutil
 import subprocess
+import time
 
 def handler(event, context):
     print(event)
@@ -21,8 +22,19 @@ def handler(event, context):
 
     # Perform the desired S3 action.
     if action in [ 'Create', 'Update' ]:
-        # Copy the archive tgz from the bucket to the local disk.
         s3 = boto3.resource('s3')
+
+        # Ensure we can access the bucket and object. The IAM attachment is eventually consistent, so there
+        # might be a delay... wait for up to a minute before giving up.
+        for i in range(60):
+            try:
+                s3.head_object(Bucket=bucket, Key=archive_key)
+            except:
+                time.sleep(1)
+                continue
+            break
+
+        # Copy the archive tgz from the bucket to the local disk.
         tmp_archive = tempfile.mktemp(suffix='.tgz')
         print('| Downloading S3 archive {}/{} to {}...'.format(bucket, archive_key, tmp_archive))
         s3.meta.client.download_file(bucket, archive_key, tmp_archive)
