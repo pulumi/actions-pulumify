@@ -9,10 +9,11 @@ To enable Pulumify in your repo, you must take three steps:
 
 1) [Enable GitHub Actions in your account](https://github.com/features/actions/signup/).
 
-2) [Configure your cloud credentials using GitHub secrets](
+2) [Configure your GitHub secrets](
    https://help.github.com/en/articles/virtual-environments-for-github-actions#creating-and-using-secrets-encrypted-variables).
-   For example, to deploy to AWS, you'll need `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values with appropriate
-   IAM permissions to deploy an S3 website to your account.
+   This must include your [`PULUMI_ACCESS_TOKEN`](https://app.pulumi.com/joeduffy/settings/tokens) in addition to your
+   cloud credentials. For example, to deploy to AWS, you'll need `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values
+   with appropriate IAM permissions to deploy an S3 website to your account.
 
 3) Commit the following file as `.github/workflows/pulumify.yml`:
 
