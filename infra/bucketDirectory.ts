@@ -103,11 +103,11 @@ class BucketDirectorySyncer extends pulumi.dynamic.Resource  {
     static provider = {
         create: async(inputs: any): Promise<pulumi.dynamic.CreateResult> => {
             await invokeSync(inputs, "Update");
-            return { id: uuid() };
+            return { id: uuid(), outs: inputs };
         },
         update: async(id: pulumi.ID, olds: any, news: any): Promise<pulumi.dynamic.UpdateResult> => {
             await invokeSync(news, "Update");
-            return {};
+            return { outs: news };
         },
         delete: async(id: pulumi.ID, olds: any): Promise<void> => {
             await invokeSync(olds, "Delete");
