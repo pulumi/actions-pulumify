@@ -64,7 +64,7 @@ def handler(event, context):
     else:
         # Recursively delete the entire bucket so that it isn't blocked from being deleted itself.
         print('| Running AWS CLI to delete entire bucket {} ...'.format(bucket))
-        aws('s3', 'rm', bucket, '--recursive')
+        aws('s3', 'rm', 's3://{}'.format(bucket), '--recursive')
 
     print('| Done.')
 
