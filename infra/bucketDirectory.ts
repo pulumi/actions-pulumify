@@ -86,11 +86,9 @@ async function invokeSync(inputs: any, action: string): Promise<void> {
                 ObjectAcl: objectAcl,
             }),
         }).promise();
-        if (resp.FunctionError) {
+        if (resp && resp.FunctionError) {
             throw new Error(
-                `Invoking sync function '${syncFunc}' failed [${resp.FunctionError}]: `+
-                    resp.Payload ? resp.Payload.toString() : ""
-            );
+                `Invoking sync function '${syncFunc}' failed [${resp.FunctionError}]: ${JSON.stringify(resp.Payload)}`);
         }
     } catch (err) {
         // TODO[pulumi/pulumi#2721]: this can go away once diagnostics for dynamic providers is improved.
