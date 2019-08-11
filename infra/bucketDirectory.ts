@@ -77,7 +77,6 @@ async function invokeSync(inputs: any, action: string): Promise<void> {
 
         // Run the copy function and then wait for it to finish.
         const lambda = new awssdk.Lambda({ region });
-        console.log(`Invoking copy function: ${syncFunc}`);
         const resp = await lambda.invoke({
             FunctionName: syncFunc,
             Payload: JSON.stringify({
@@ -89,9 +88,10 @@ async function invokeSync(inputs: any, action: string): Promise<void> {
         }).promise();
         if (resp.FunctionError) {
             throw new Error(
-                `Invoking copy function failed [${resp.FunctionError}]: ${resp.Payload ? resp.Payload.toString() : ""}`);
+                `Invoking sync function '${syncFunc}' failed [${resp.FunctionError}]: `+
+                    resp.Payload ? resp.Payload.toString() : ""
+            );
         }
-        console.log(`Invocation complete.`);
     } catch (err) {
         // TODO[pulumi/pulumi#2721]: this can go away once diagnostics for dynamic providers is improved.
         console.log(err);
