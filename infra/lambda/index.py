@@ -19,23 +19,23 @@ def handler(event, context):
     archive_key = event['ArchiveKey']
     object_acl = event.get('ObjectAcl')
 
-    # Copy the archive tgz from the bucket to the local disk.
-    s3 = boto3.resource('s3')
-    tmp_archive = tempfile.mktemp(suffix='.tgz')
-    print('| Downloading S3 archive {}/{} to {}...'.format(bucket, archive_key, tmp_archive))
-    s3.meta.client.download_file(bucket, archive_key, tmp_archive)
-    print('| Done.')
-
-    try:
-        # Now uncompress the entire archive.
-        tmp_archive_dir = tempfile.mkdtemp()
-        print('| Decompressing archive to {}...'.format(tmp_archive_dir))
-        tarfile.open(tmp_archive).extractall(path=tmp_archive_dir)
+    # Perform the desired S3 action.
+    if action in [ 'Create', 'Update' ]:
+        # Copy the archive tgz from the bucket to the local disk.
+        s3 = boto3.resource('s3')
+        tmp_archive = tempfile.mktemp(suffix='.tgz')
+        print('| Downloading S3 archive {}/{} to {}...'.format(bucket, archive_key, tmp_archive))
+        s3.meta.client.download_file(bucket, archive_key, tmp_archive)
         print('| Done.')
 
         try:
-            # Perform the desired S3 action.
-            if action in [ 'Create', 'Update' ]:
+            # Now uncompress the entire archive.
+            tmp_archive_dir = tempfile.mkdtemp()
+            print('| Decompressing archive to {}...'.format(tmp_archive_dir))
+            tarfile.open(tmp_archive).extractall(path=tmp_archive_dir)
+            print('| Done.')
+
+            try:
                 # Run an "AWS S3 sync" command to efficiently decompress the contents. Note that because
                 # we pass the --delete option, the archive itself will also be removed automatically.
                 print('| Running AWS CLI to sync to {}...'.format(bucket))
@@ -45,15 +45,16 @@ def handler(event, context):
                     sync_args.append('--acl')
                     sync_args.append(object_acl)
                 aws(*sync_args)
-            else:
-                # Recursively delete the entire bucket so that it isn't blocked from being deleted itself.
-                print('| Running AWS CLI to delete entire bucket {} ...'.format(bucket))
-                aws('s3', 'rm', bucket, '--recursive')
-            print('| Done.')
+            finally:
+                shutil.rmtree(tmp_archive_dir)
         finally:
-            shutil.rmtree(tmp_archive_dir)
-    finally:
-        os.remove(tmp_archive)
+            os.remove(tmp_archive)
+    else:
+        # Recursively delete the entire bucket so that it isn't blocked from being deleted itself.
+        print('| Running AWS CLI to delete entire bucket {} ...'.format(bucket))
+        aws('s3', 'rm', bucket, '--recursive')
+
+    print('| Done.')
 
 def aws(*args):
     print('AWS: {}'.format(' '.join(args)))
