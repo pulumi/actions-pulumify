@@ -28,27 +28,50 @@ if [ ! -z "$GITHUB_WORKFLOW" ]; then
     export PULUMI_CI_PULL_REQUEST_SHA="$GITHUB_SHA"
 fi
 
-# Detect what PR action is being taken. If it's one of the edit actions, we will preview the changes;
-# if it's a "close", we will delete the stack; otherwise, we exit cleanly because there's nothing to do.
-PR_ACTION=$(cat "$GITHUB_EVENT_PATH" | jq -r ".action")
-PR_NUMBER=$(cat "$GITHUB_EVENT_PATH" | jq -r ".number")
-PR_BRANCH=$(cat "$GITHUB_EVENT_PATH" | jq -r ".pull_request.head.ref")
-echo "# PR #$PR_NUMBER, action '$PR_ACTION', branch $PR_BRANCH"
-case "$PR_ACTION" in
-    "opened" | "reopened" | "synchronize")
-        PULUMI_UPDATE=true
+# Detect what action is being taken. If it's a PR that's been edited, we will preview the changes;
+# if it's a "close" or branch deletion, we will delete the stack; otherwise, we exit cleanly because
+# there's nothing to do.
+case "$GITHUB_EVENT_NAME" in
+    "pull_request")
+        # Extract PR attributes.
+        GH_PR_ACTION=$(cat "$GITHUB_EVENT_PATH" | jq -r ".action")
+        GH_PR_NUMBER=$(cat "$GITHUB_EVENT_PATH" | jq -r ".number")
+        GH_BRANCH=$(cat "$GITHUB_EVENT_PATH" | jq -r ".pull_request.head.ref")
+        echo "# PR #$GH_PR_NUMBER, action '$GH_PR_ACTION', branch $GH_BRANCH"
+        # Switch on the action type to determine how to proceed.
+        case "$GH_PR_ACTION" in
+            "opened" | "reopened" | "synchronize")
+                PULUMI_UPDATE=true
+                ;;
+            "closed")
+                PULUMI_UPDATE=false
+                ;;
+            *)
+                echo "# Nothing to do for '$GH_PR_ACTION' action"
+                exit
+                ;;
+        esac
         ;;
-    "closed")
+    "delete")
+        # Extract deletion attributes.
+        GH_BRANCH=$(cat "$GITHUB_EVENT_PATH" | jq -r ".ref")
+        echo "# Branch deletion for $GH_BRANCH"
+        # For branch deletions, always delete the branch.
         PULUMI_UPDATE=false
-        ;;
-    *)
-        echo "# Nothing to do for '$PR_ACTION' action"
-        exit
         ;;
 esac
 
 # If there is a build command, run it now to prepare the content.
 if [ "$PULUMI_UPDATE" = true ] && [ ! -z "${PULUMIFY_BUILD:-}" ]; then
+    echo "# Synchronizing repo ..."
+    git init
+    git remote add origin https://github.com/${GITHUB_REPOSITORY}
+    git config gc.auto 0
+    git config --get-all http.https://github.com/${GITHUB_REPOSITORY}.extraheader
+    git config --get-all http.proxy
+    git -c http.extraheader="AUTHORIZATION: basic ***" fetch \
+        --tags --prune --progress --no-recurse-submodules --depth=1 origin +refs/heads/*:refs/remotes/origin/*
+    git checkout --progress --force $GH_BRANCH
     echo "# Rebuilding content ..."
     eval $PULUMIFY_BUILD
 fi
@@ -57,7 +80,7 @@ fi
 cd /infra
 
 # Extract the branch name and clean it to produce a stack name.
-PULUMI_STACK_NAME=$(echo "pulumify-$PR_BRANCH" | sed "s/[^[:alnum:].-]/-/g")
+PULUMI_STACK_NAME=$(echo "pulumify-$GH_BRANCH" | sed "s/[^[:alnum:].-]/-/g")
 if [ ! -z "${PULUMIFY_ORGANIZATION:-}" ]; then
     # If an organization stack is requested, put the stack under the organization.
     PULUMI_STACK_NAME=$PULUMIFY_ORGANIZATION/$PULUMI_STACK_NAME
