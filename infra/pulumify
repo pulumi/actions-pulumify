@@ -67,7 +67,7 @@ if [ "$PULUMI_UPDATE" = true ]; then
     git init
     git remote add origin https://github.com/${GITHUB_REPOSITORY}
     git config gc.auto 0
-    git -c http.extraheader="AUTHORIZATION: basic ***" fetch \
+    git -c http.extraheader="AUTHORIZATION: basic ${GITHUB_TOKEN}" fetch \
         --tags --prune --progress --no-recurse-submodules --depth=1 origin +refs/heads/*:refs/remotes/origin/*
     git checkout --progress --force $GH_BRANCH
 
