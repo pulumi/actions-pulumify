@@ -61,19 +61,21 @@ case "$GITHUB_EVENT_NAME" in
         ;;
 esac
 
-# If there is a build command, run it now to prepare the content.
-if [ "$PULUMI_UPDATE" = true ] && [ ! -z "${PULUMIFY_BUILD:-}" ]; then
+# If we're going to update, ensure we've sync'd the repo.
+if [ "$PULUMI_UPDATE" = true ]; then
     echo "# Synchronizing repo ..."
     git init
     git remote add origin https://github.com/${GITHUB_REPOSITORY}
     git config gc.auto 0
-    git config --get-all http.https://github.com/${GITHUB_REPOSITORY}.extraheader
-    git config --get-all http.proxy
     git -c http.extraheader="AUTHORIZATION: basic ***" fetch \
         --tags --prune --progress --no-recurse-submodules --depth=1 origin +refs/heads/*:refs/remotes/origin/*
     git checkout --progress --force $GH_BRANCH
-    echo "# Rebuilding content ..."
-    eval $PULUMIFY_BUILD
+
+    # If there is a build command, run it now to prepare the content.
+    if [ ! -z "${PULUMIFY_BUILD:-}" ]; then
+        echo "# Rebuilding content ..."
+        eval $PULUMIFY_BUILD
+    fi
 fi
 
 # This is a bit of a hack, but GitHub Actions hijacks the container working directory.
