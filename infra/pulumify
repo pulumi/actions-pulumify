@@ -73,7 +73,10 @@ if [ "$PULUMI_UPDATE" = true ]; then
     # If there is a build command, run it now to prepare the content.
     if [ ! -z "${PULUMIFY_BUILD:-}" ]; then
         echo "# Rebuilding content ..."
-        eval $PULUMIFY_BUILD
+        # IMPORTANT!!! This runs an arbitrary command. We run this in a fresh shell without access to
+        # the environment variables, so that sensitive information in the environment cannot be accessed.
+        # Notably, neither `eval $PULUMIFY_BUILD` nor `bash -c $PULUMIFY_BUILD` would do the trick.
+        env -i bash -c "$PULUMIFY_BUILD"
     fi
 fi
 
