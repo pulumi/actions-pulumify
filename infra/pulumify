@@ -19,6 +19,12 @@ set -exuo pipefail
 #
 # This allows easy review of static website changes in line with GitHub pull request workflows.
 
+# See if we have the requisite credentials. If not, we might be in a fork. Exit cleanly.
+if [ -z "${AWS_ACCESS_KEY_ID:-}" ] || [ -z "${AWS_SECRET_ACCESS_KEY:-}" ] || [ -z "${PULUMI_ACCESS_TOKEN:-}" ]; then
+    echo "# Missing secret tokens -- possibly due to a forked PR -- skipping"
+    exit
+fi
+
 # Set up some variables so that the Pulumi CLI knows it's running in the context of GitHub.
 if [ ! -z "$GITHUB_WORKFLOW" ]; then
     export PULUMI_CI_SYSTEM="GitHub"
