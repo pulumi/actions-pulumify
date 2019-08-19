@@ -82,7 +82,7 @@ if [ "$PULUMI_UPDATE" = true ]; then
         # IMPORTANT!!! This runs an arbitrary command. We run this in a fresh shell without access to
         # the environment variables, so that sensitive information in the environment cannot be accessed.
         # Notably, neither `eval $PULUMIFY_BUILD` nor `bash -c $PULUMIFY_BUILD` would do the trick.
-        env -i bash -c "$PULUMIFY_BUILD"
+        env -i GITHUB_REPOSITORY=$GITHUB_REPOSITORY GITHUB_SHA=$GITHUB_SHA bash -c "$PULUMIFY_BUILD"
     fi
 fi
 
