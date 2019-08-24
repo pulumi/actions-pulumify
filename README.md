@@ -43,7 +43,7 @@ To enable Pulumify in your repo, do the following:
             PULUMIFY_ROOT: public
     ```
 
-   Feel free to customize  the `PULUMIFY_BUILD` or `PULUMIFY_ROOT` settings as appropriate. It's also possible
-   to stand up your stacks in a Pulumi organization using `PULUMIFY_ORGANIZATION`.
+   Feel free to customize  the `PULUMIFY_BUILD` or `PULUMIFY_ROOT` settings as appropriate. This example uses
+   [Hugo](https://gohugo.io/). It's also possible to deploy to a Pulumi organization using `PULUMIFY_ORGANIZATION`.
 
 After these three steps, the Pulumify GitHub Action will comment on your PRs automatically with URLs to your websites.
