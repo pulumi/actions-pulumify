@@ -21,8 +21,16 @@ export class BucketDirectory extends pulumi.ComponentResource {
         // copying over the Internet, and then to apply an efficient "S3 sync" from within the
         // Amazon data center, where bandwidth to the target S3 bucket will be maximized.
         const arch = tmp.fileSync({ postfix: ".tgz" }).name;
-        // TODO(joe): this always shows up as a diff; is it because of timestamps?
-        tar.c({ gzip: true, sync: true, file: arch, C: args.source }, fs.readdirSync(args.source));
+
+        // Tar up the contents, making sure to set the portable flag so we only detect changes
+        // when the actual hash of the contents changes (and not non-portable timestamps, etc).
+        tar.c({
+            gzip: true,
+            sync: true,
+            file: arch,
+            C: args.source,
+            portable: true,
+        }, fs.readdirSync(args.source));
 
         // TODO(joe): when archive can be an asset, we can just use this line, instead of manual tgzing:
         // const arch = new pulumi.asset.FileArchive(args.source);
