@@ -196,6 +196,7 @@ class BucketDirectorySyncer extends pulumi.dynamic.Resource  {
             syncFunc,
             bucket: args.archive.bucket,
             archiveKey: args.archive.key,
+            archiveEtag: args.archive.etag,
             objectAcl: args.objectAcl,
         };
         super(BucketDirectorySyncer.provider, name, superArgs, opts);
