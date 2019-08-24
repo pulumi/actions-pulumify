@@ -19,18 +19,13 @@ To enable Pulumify in your repo, you must take three steps:
 
     ```
     name: Pulumify
-    on: pull_request
+    on: [pull_request, delete]
     jobs:
       updateLivePreview:
         name: Update Live Preview
         runs-on: ubuntu-latest
         steps:
-        - uses: actions/checkout@master
-          if: github.event.action != 'closed'
-          with:
-            ref: ${{ github.event.pull_request.head.ref }}
-            fetch-depth: 1
-        - uses: pulumi/actions-pulumify@master
+        - uses: docker://joeduffy/pulumify
           env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -40,6 +35,7 @@ To enable Pulumify in your repo, you must take three steps:
             PULUMIFY_ROOT: public
     ```
 
-   Feel free to customize  the `PULUMIFY_BUILD` or `PULUMIFY_ROOT` settings as appropriate.
+   Feel free to customize  the `PULUMIFY_BUILD` or `PULUMIFY_ROOT` settings as appropriate. It's also possible
+   to stand up your stacks in a Pulumi organization using `PULUMIFY_ORGANIZATION`.
 
 After these three steps, the Pulumify GitHub Action will comment on your PRs automatically with URLs to your websites.
