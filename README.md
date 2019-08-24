@@ -1,11 +1,19 @@
-# Pulumify GitHub Action
+# Pulumify - Easy Static Website Previews for GitHub :tropical_drink:
 
-This repo contains the definition for the Pulumify GitHub Action. This action uses [Pulumi](https://pulumi.com)
-to automatically build and deploy static websites to any cloud, including Pull Request integrated previews.
+Pulumify automatically builds and publishes static website previews to AWS S3 in response to GitHub Pull
+Requests. This lets you rapidly iterate on website changes that are easily reviewable with your team.
 
-## How to Use
+Just configure it using the steps below, open a new PR, and voila!
 
-To enable Pulumify in your repo, you must take three steps:
+![Pulumify In Action!](./images/pulumify.png)
+
+This action uses [Pulumi](https://pulumi.com) and [GitHub Actions](
+https://help.github.com/en/categories/automating-your-workflow-with-github-actions). Pulumi supports other
+clouds and based on interest, we'd be happy to add support for Azure, GCP, etc.
+
+## Configuring Pulumify in Your Repo
+
+To enable Pulumify in your repo, do the following:
 
 1) [Enable GitHub Actions in your account](https://github.com/features/actions/signup/).
 
