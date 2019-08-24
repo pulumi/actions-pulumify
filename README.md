@@ -7,7 +7,7 @@ Just configure it using the steps below, open a new PR, and voila!
 
 ![Pulumify In Action!](./images/pulumify.png)
 
-This action uses [Pulumi](https://pulumi.com) and [GitHub Actions](
+Pulumify is powered by [Pulumi](https://pulumi.com) and [GitHub Actions](
 https://help.github.com/en/categories/automating-your-workflow-with-github-actions). Pulumi supports other
 clouds and based on interest, we'd be happy to add support for Azure, GCP, etc.
 
