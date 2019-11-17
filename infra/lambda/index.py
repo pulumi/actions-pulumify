@@ -39,7 +39,7 @@ def handler(event, context):
         # We do this instead of saving it to a temporary file to avoid running into
         # the Lambda /tmp directory storage limit of 512 MB.
         print('| Downloading S3 archive {}/{}...'.format(bucket, archive_key))
-        archive_bytes = io.BytesIO(s3.get_object(Bucket=bucket, Key=archive_key)['Body'].read())
+        archive_bytes = io.BytesIO(s3.meta.client.get_object(Bucket=bucket, Key=archive_key)['Body'].read())
         print('| Done.')
 
         # Now uncompress the entire archive.
