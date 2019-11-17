@@ -1,4 +1,5 @@
 import boto3
+import io
 import logging
 import os
 import tarfile
@@ -34,33 +35,31 @@ def handler(event, context):
                 continue
             break
 
-        # Copy the archive tgz from the bucket to the local disk.
-        tmp_archive = tempfile.mktemp(suffix='.tgz')
-        print('| Downloading S3 archive {}/{} to {}...'.format(bucket, archive_key, tmp_archive))
-        s3.meta.client.download_file(bucket, archive_key, tmp_archive)
+        # Download the archive tgz from the bucket and buffer it into memory.
+        # We do this instead of saving it to a temporary file to avoid running into
+        # the Lambda /tmp directory storage limit of 512 MB.
+        print('| Downloading S3 archive {}/{}...'.format(bucket, archive_key))
+        archive_bytes = io.BytesIO(s3.get_object(Bucket=bucket, Key=archive_key)['Body'].read())
+        print('| Done.')
+
+        # Now uncompress the entire archive.
+        tmp_archive_dir = tempfile.mkdtemp()
+        print('| Decompressing archive to {}...'.format(tmp_archive_dir))
+        tarfile.open(None, 'r', fileobj=archive_bytes).extractall(path=tmp_archive_dir)
         print('| Done.')
 
         try:
-            # Now uncompress the entire archive.
-            tmp_archive_dir = tempfile.mkdtemp()
-            print('| Decompressing archive to {}...'.format(tmp_archive_dir))
-            tarfile.open(tmp_archive).extractall(path=tmp_archive_dir)
-            print('| Done.')
-
-            try:
-                # Run an "AWS S3 sync" command to efficiently decompress the contents. Note that because
-                # we pass the --delete option, the archive itself will also be removed automatically.
-                print('| Running AWS CLI to sync to {}...'.format(bucket))
-                sync_args = ['s3', 'sync', tmp_archive_dir, 's3://{}'.format(bucket), '--delete']
-                if object_acl:
-                    print('| - Setting object ACLs to {}'.format(object_acl))
-                    sync_args.append('--acl')
-                    sync_args.append(object_acl)
-                aws(*sync_args)
-            finally:
-                shutil.rmtree(tmp_archive_dir)
+            # Run an "AWS S3 sync" command to efficiently decompress the contents. Note that because
+            # we pass the --delete option, the archive itself will also be removed automatically.
+            print('| Running AWS CLI to sync to {}...'.format(bucket))
+            sync_args = ['s3', 'sync', tmp_archive_dir, 's3://{}'.format(bucket), '--delete']
+            if object_acl:
+                print('| - Setting object ACLs to {}'.format(object_acl))
+                sync_args.append('--acl')
+                sync_args.append(object_acl)
+            aws(*sync_args)
         finally:
-            os.remove(tmp_archive)
+            shutil.rmtree(tmp_archive_dir)
     else:
         # Recursively delete the entire bucket so that it isn't blocked from being deleted itself.
         print('| Running AWS CLI to delete entire bucket {} ...'.format(bucket))
