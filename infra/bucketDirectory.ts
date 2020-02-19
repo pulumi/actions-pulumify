@@ -181,9 +181,6 @@ class BucketDirectorySyncer extends pulumi.dynamic.Resource  {
                     },
                 ],
             },
-            tags: {
-              "Owner": "Pulumify",
-            },
         }, { parent });
         const syncFuncPolicyAtt = new aws.iam.RolePolicyAttachment(`${name}-copyfunc-policy-att`, {
             role: syncFuncRole.name,
