@@ -132,9 +132,6 @@ class BucketDirectorySyncer extends pulumi.dynamic.Resource  {
                     Effect: "Allow",
                     Sid: "",
                 }],
-            },
-            tags: {
-              "Owner": "Pulumify",
             }
         }, { parent });
         const syncFunc = new aws.lambda.Function(`${name}-copyfunc`, {
@@ -144,9 +141,6 @@ class BucketDirectorySyncer extends pulumi.dynamic.Resource  {
             code: new pulumi.asset.FileArchive("./lambda/bin"),
             handler: "index.handler",
             role: syncFuncRole.arn,
-            tags: {
-              "Owner": "Pulumify"
-            }
         }, { parent });
 
         // Allow Lambda to read/write from the S3 bucket.

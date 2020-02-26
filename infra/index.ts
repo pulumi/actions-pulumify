@@ -18,9 +18,6 @@ const contentBucket = new aws.s3.Bucket("content-bucket", {
         indexDocument: "index.html",
         errorDocument: "404.html",
     },
-    tags: {
-      "Owner": "Pulumify",
-    }
 });
 
 // Upload the entire directory contents to the S3 bucket. To do this, we leverage the
