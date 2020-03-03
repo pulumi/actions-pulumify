@@ -30,6 +30,7 @@ const content = new BucketDirectory("content", {
     bucket: contentBucket,
     source: contentRoot,
     objectAcl: "public-read",
+    syncStrategy: "server-ecstask",
 }, { parent: contentBucket });
 
 // Export the bucket name.
