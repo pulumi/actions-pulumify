@@ -113,8 +113,9 @@ if [ "$PULUMI_UPDATE" = true ]; then
     # If the stack doesn't exist yet, create it.
     if [ $PULUMI_STACK_EXISTS -ne 0 ]; then
         pulumi stack init $PULUMI_STACK_NAME
-        pulumi config set root $GITHUB_WORKSPACE/${PULUMIFY_ROOT:-public}
-        pulumi config set aws:region ${AWS_REGION:-us-east-1}
+        pulumi config set root $GITHUB_WORKSPACE/${PULUMIFY_ROOT:-"public"}
+        pulumi config set syncStrategy ${PULUMIFY_SYNC_STRATEGY:-"server-lambda"}
+        pulumi config set aws:region ${AWS_REGION:-"us-east-1"}
     fi
 
     # Now simply run an update to provision and/or update the static website.

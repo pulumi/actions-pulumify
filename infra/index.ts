@@ -8,6 +8,7 @@ import { BucketDirectory } from "./bucketDirectory";
 // The content comes from a configurable location.
 const config = new pulumi.Config();
 const contentRoot = config.require("root");
+const syncStrategy = config.get("syncStrategy");
 
 // Create a bucket to store and serve the static content.
 const contentBucket = new aws.s3.Bucket("content-bucket", {
@@ -30,6 +31,7 @@ const content = new BucketDirectory("content", {
     bucket: contentBucket,
     source: contentRoot,
     objectAcl: "public-read",
+    syncStrategy: <any>syncStrategy,
 }, { parent: contentBucket });
 
 // Export the bucket name.
