@@ -245,59 +245,61 @@ export type BucketSyncStrategy =
     "local-copy"
 ;
 
+async function invokeLambdaSync(inputs: any, action: string): Promise<void> {
+    try {
+        const bucket = inputs["bucket"] as string;
+        if (!bucket) {
+            throw new Error("Missing bucket in BucketDirectory inputs");
+        }
+        const archiveKey = inputs["archiveKey"] as string;
+        if (!archiveKey) {
+            throw new Error("Missing archiveKey in BucketDirectory inputs");
+        }
+        const objectAcl = inputs["objectAcl"] as string;
+        const syncFunc = inputs["syncFunc"] as string;
+        if (!syncFunc) {
+            throw new Error("Missing syncFunc ARN in BucketDirectory inputs");
+        }
+
+        // Run the copy function and then wait for it to finish.
+        const lambda = new awssdk.Lambda({ region });
+        const resp = await lambda.invoke({
+            FunctionName: syncFunc,
+            Payload: JSON.stringify({
+                Action: action,
+                Bucket: bucket,
+                ArchiveKey: archiveKey,
+                ObjectAcl: objectAcl,
+            }),
+        }).promise();
+        if (resp && resp.FunctionError) {
+            throw new Error(
+                `Invoking sync function '${syncFunc}' failed [${resp.FunctionError}]: ${JSON.stringify(resp.Payload)}`);
+        }
+    } catch (err) {
+        // TODO[pulumi/pulumi#2721]: this can go away once diagnostics for dynamic providers is improved.
+        console.log(err);
+        throw err;
+    }
+}
+
 /**
  * BucketDirectoryLambdaSyncer is the implementation of the "server-lambda" sync strategy.
  */
 class BucketDirectoryLambdaSyncer extends pulumi.dynamic.Resource  {
-    private static async invokeSync(inputs: any, action: string): Promise<void> {
-        try {
-            const bucket = inputs["bucket"] as string;
-            if (!bucket) {
-                throw new Error("Missing bucket in BucketDirectory inputs");
-            }
-            const archiveKey = inputs["archiveKey"] as string;
-            if (!archiveKey) {
-                throw new Error("Missing archiveKey in BucketDirectory inputs");
-            }
-            const objectAcl = inputs["objectAcl"] as string;
-            const syncFunc = inputs["syncFunc"] as string;
-            if (!syncFunc) {
-                throw new Error("Missing syncFunc ARN in BucketDirectory inputs");
-            }
-
-            // Run the copy function and then wait for it to finish.
-            const lambda = new awssdk.Lambda({ region });
-            const resp = await lambda.invoke({
-                FunctionName: syncFunc,
-                Payload: JSON.stringify({
-                    Action: action,
-                    Bucket: bucket,
-                    ArchiveKey: archiveKey,
-                    ObjectAcl: objectAcl,
-                }),
-            }).promise();
-            if (resp && resp.FunctionError) {
-                throw new Error(
-                    `Invoking sync function '${syncFunc}' failed [${resp.FunctionError}]: ${JSON.stringify(resp.Payload)}`);
-            }
-        } catch (err) {
-            // TODO[pulumi/pulumi#2721]: this can go away once diagnostics for dynamic providers is improved.
-            console.log(err);
-            throw err;
-        }
-    }
-
     private static provider = {
         create: async(inputs: any): Promise<pulumi.dynamic.CreateResult> => {
-            await BucketDirectoryLambdaSyncer.invokeSync(inputs, "Create");
+            await invokeLambdaSync(inputs, "Create");
             return { id: uuid(), outs: inputs };
         },
         update: async(id: pulumi.ID, olds: any, news: any): Promise<pulumi.dynamic.UpdateResult> => {
-            await BucketDirectoryLambdaSyncer.invokeSync(news, "Update");
+            if (olds.archiveEtag !== news.archiveEtag) {
+                await invokeLambdaSync(news, "Update");
+            }
             return { outs: news };
         },
         delete: async(id: pulumi.ID, olds: any): Promise<void> => {
-            await BucketDirectoryLambdaSyncer.invokeSync(olds, "Delete");
+            await invokeLambdaSync(olds, "Delete");
         },
     };
 

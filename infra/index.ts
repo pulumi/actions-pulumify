@@ -31,7 +31,7 @@ const content = new BucketDirectory("content", {
     bucket: contentBucket,
     source: contentRoot,
     objectAcl: "public-read",
-    syncStrategy: syncStrategy,
+    syncStrategy: <any>syncStrategy,
 }, { parent: contentBucket });
 
 // Export the bucket name.
