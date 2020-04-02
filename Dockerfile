@@ -1,4 +1,4 @@
-FROM pulumi/pulumi
+FROM pulumi/pulumi:v1.14.0
 
 # Label things so it lights up in GitHub Actions!
 LABEL "com.github.actions.name"="Pulumify"
