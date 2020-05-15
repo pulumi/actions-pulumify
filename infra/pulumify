@@ -119,7 +119,7 @@ if [ "$PULUMI_UPDATE" = true ]; then
     fi
 
     # Now simply run an update to provision and/or update the static website.
-    pulumi up --skip-preview
+    pulumi up --skip-preview --yes
 
     # Next, post a comment to the PR that directs the user to the resulting bucket URL.
     # TODO(joe): recognize failures?
@@ -133,7 +133,7 @@ else
     # If the stack doesn't even exist, there's nothing to do. Otherwise, we must destroy and then
     # remove the resulting stack altogether.
     if [ $PULUMI_STACK_EXISTS -eq 0 ]; then
-        pulumi destroy --skip-preview
+        pulumi destroy --skip-preview --yes
         pulumi stack rm --yes
     else
         echo "# Already destroyed -- nothing more to do"
