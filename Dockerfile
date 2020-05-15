@@ -1,13 +1,13 @@
-FROM pulumi/pulumi:v1.14.0
+FROM pulumi/pulumi:v2.2.1
 
 # Label things so it lights up in GitHub Actions!
 LABEL "com.github.actions.name"="Pulumify"
 LABEL "com.github.actions.description"="Deploy static websites to your favorite cloud!"
 LABEL "com.github.actions.icon"="cloud-lightning"
 LABEL "com.github.actions.color"="purple"
-LABEL "repository"="https://github.com/joeduffy/pulumify"
-LABEL "homepage"="http://pulumi.com/docs"
-LABEL "maintainer"="Joe Duffy <joe@pulumi.com>"
+LABEL "repository"="https://github.com/pulumi/actions-pulumify"
+LABEL "homepage"="https://pulumi.com/"
+LABEL "maintainer"="Pulumi Team <team@pulumi.com>"
 
 # Install some tools we'll need.
 RUN apt-get update -y

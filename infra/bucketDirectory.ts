@@ -44,7 +44,7 @@ export class BucketDirectory extends pulumi.ComponentResource {
     /**
      * The child resource allocated to perform the directory sync'ing.
      */
-    private readonly syncer: BucketDirectoryLambdaSyncer;
+    private readonly syncer?: BucketDirectoryLambdaSyncer;
 
     /**
      * Provisions a new BucketDirectory resource with a given name, arguments, and options.

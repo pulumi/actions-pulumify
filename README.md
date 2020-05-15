@@ -19,7 +19,7 @@ To enable Pulumify in your repo, do the following:
 
 2) [Configure your GitHub secrets](
    https://help.github.com/en/articles/virtual-environments-for-github-actions#creating-and-using-secrets-encrypted-variables).
-   This must include your [`PULUMI_ACCESS_TOKEN`](https://app.pulumi.com/joeduffy/settings/tokens) in addition to your
+   This must include your [`PULUMI_ACCESS_TOKEN`](https://app.pulumi.com/account/tokens) in addition to your
    cloud credentials. For example, to deploy to AWS, you'll need `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values
    with appropriate IAM permissions to deploy an S3 website to your account.
 
@@ -33,7 +33,7 @@ To enable Pulumify in your repo, do the following:
         name: Update Live Preview
         runs-on: ubuntu-latest
         steps:
-        - uses: docker://joeduffy/pulumify
+        - uses: docker://pulumi/pulumify
           env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
