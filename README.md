@@ -33,6 +33,7 @@ To enable Pulumify in your repo, do the following:
         name: Update Live Preview
         runs-on: ubuntu-latest
         steps:
+        - uses: actions/checkout@v2
         - uses: docker://pulumi/pulumify
           env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

@@ -11,7 +11,7 @@ LABEL "maintainer"="Pulumi Team <team@pulumi.com>"
 
 # Install some tools we'll need.
 RUN apt-get update -y
-RUN apt-get install -y jq wget git make
+RUN apt-get install -y jq wget make
 
 # Install content generation tools.
 # TODO(joe): this should eventually get factored out to be pluggable, so that the
