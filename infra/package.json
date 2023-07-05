@@ -16,7 +16,7 @@
     "dependencies": {
         "@pulumi/aws": "^2.0.0",
         "@pulumi/awsx": "^0.20.0",
-        "@pulumi/pulumi": "^2.0.0",
+        "@pulumi/pulumi": "^2.25.2",
         "aws-sdk": "^2.504.0",
         "mime": "^2.0.3",
         "tar": "^4.4.18",
